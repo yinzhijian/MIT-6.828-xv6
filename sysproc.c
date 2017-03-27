@@ -51,8 +51,10 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   addr = proc->sz;
-  if(growproc(n) < 0)
-    return -1;
+  //modify to lazy allocation
+  //if(growproc(n) < 0)
+  //  return -1;
+  proc->sz += n;
   return addr;
 }
 
@@ -88,4 +90,15 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+// return the current UTC time
+int
+sys_date(void)
+{
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  cmostime((struct rtcdate *)n);
+  return 0;
 }
