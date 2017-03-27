@@ -54,6 +54,14 @@ trap(struct trapframe *tf)
     if(cpunum() == 0){
       acquire(&tickslock);
       ticks++;
+      if(proc && (tf->cs & 3) == 3){
+        proc->ticks++;
+        if(proc->alarmticks>=0 &&proc->ticks>=proc->alarmticks && (proc->ticks % proc->alarmticks) ==0){
+	  tf->esp-=4;
+	  *((uint *)tf->esp) = tf->eip;
+	  tf->eip = (uint)(proc->alarmhandler);
+	}
+      }
       wakeup(&ticks);
       release(&tickslock);
     }
